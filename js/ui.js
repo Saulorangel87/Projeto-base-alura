@@ -15,11 +15,18 @@ const ui = {
 
     async renderPensamentos() {
         const listaPensamentos = document.getElementById("lista-pensamentos")
+        const mensagemVazia = document.getElementById("mensagem-vazia")
         listaPensamentos.innerHTML = ""
 
         try {
             const pensamentos = await api.buscarPensamentos()
             pensamentos.forEach(pensamento => ui.adicionarPensamentoNaLista(pensamento))
+            if (pensamentos.length === 0) {
+                mensagemVazia.style.display = "block"
+            } else {
+                mensagemVazia.style.display = "none"
+                pensamentos.forEach(ui.adicionarPensamentoNaLista)
+            }
         }
         catch (error) {
             alert("Erro ao renderizar os pensamentos!")
