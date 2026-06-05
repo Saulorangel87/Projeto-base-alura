@@ -1,10 +1,22 @@
 const URL_BASE = "http://localhost:3000";
 
+const converterStringParaData = (dataString) => {
+    const [ano, mes, dia] = dataString.split("-")
+    return new Date(Date.UTC(ano, mes -1, dia))
+}
+
 const api = {
     async buscarPensamentos() {
         try {
             const response = await axios.get(`${URL_BASE}/pensamentos`);
-            return await response.data
+            const pensamentos = await response.data
+
+            return pensamentos.map(pensamento => {
+                return {
+                    ...pensamento,
+                    data: new Date(pensamento.data)
+                }
+            })
         }
         catch (error) {
             alert("Erro ao buscar os pensamentos!")
@@ -14,7 +26,10 @@ const api = {
 
     async salvarPensamento(pensamento) {
         try {
-            const response = await axios.post(`${URL_BASE}/pensamentos`, pensamento);
+            const data = converterStringParaData(pensamento.data)
+            const response = await axios.post(`${URL_BASE}/pensamentos`, {
+                ...pensamento, data: data.toISOString()
+            });
             return await response.data
         }
         catch (error) {
@@ -26,7 +41,11 @@ const api = {
     async buscarPensamentoPorId(id) {
         try {
             const response = await axios.get(`${URL_BASE}/pensamentos/${id}`)
-            return await response.data
+            const pensamento = await response.data
+            return {
+                ...pensamento,
+                data: new Date(pensamento.data)
+            }
         }
         catch (error) {
             alert("Erro ao buscar os pensamento!")
@@ -69,7 +88,17 @@ const api = {
             alert("Erro ao buscar pensamentos!")
             throw error
         }
+    },
+
+    async atualizarFavorito(id, favorito) {
+        try {
+            const response = await axios.patch(`${URL_BASE}/pensamentos/${id}`, { favorito })
+            return response.data
+        } catch (error) {
+            alert("Erro ao atualizar favorito!")
+            throw error
+        }
     }
 }
 
-export default api;
+export default api
